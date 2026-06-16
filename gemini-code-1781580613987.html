@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MacroSnap</title>
+    
+    <!-- Gen Z / Modern Tech Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* High Contrast Modern Theme */
+            --bg-base: #000000;
+            --bg-surface: #111111;
+            --border-subtle: #222222;
+            --accent: #ccff00; /* Electric Lime */
+            --accent-dim: rgba(204, 255, 0, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        /* App Page Wrapper */
+        .page {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            padding: 24px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .active {
+            display: flex;
+        }
+
+        /* --- DASHBOARD VIEW --- */
+        .header-section {
+            width: 100%;
+            margin-top: 12px;
+            margin-bottom: 32px;
+        }
+
+        .header-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+        }
+
+        .header-section p {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: -4px;
+        }
+
+        /* Progress Card Components */
+        .summary-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            padding: 28px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .metric-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .metric-value-large {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            margin-top: 8px;
+            color: var(--accent);
+        }
+
+        .metric-value-large span {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 0;
+        }
+
+        .macro-progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .macro-progress-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .macro-info-label {
+            width: 70px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .progress-track {
+            flex-grow: 1;
+            height: 8px;
+            background: var(--border-subtle);
+            border-radius: 4px;
+            margin: 0 16px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease-out;
+        }
+
+        .macro-data-numbers {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-align: right;
+            width: 50px;
+        }
+
+        /* History Activity Feed */
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
+        .history-feed {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 24px;
+        }
+
+        .history-item {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-details h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .item-details p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+
+        .item-calories {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 20px;
+            border-radius: 100px; /* Pill shape for Gen Z look */
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button.primary-btn {
+            background: var(--accent);
+            color: #000000;
+        }
+
+        button.outline-btn {
+            background: transparent;
+            border: 2px solid var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        button:active {
+            transform: scale(0.97);
+            opacity: 0.8;
+        }
+
+        /* --- SCANNER VIEW --- */
+        .navigation-top {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .back-nav-trigger {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .camera-module-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3 / 4; /* Better for mobile scanning */
+            background: #111;
+            border-radius: 32px;
+            overflow: hidden;
+            border: 2px solid var(--border-subtle);
+            margin-bottom: 24px;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #canvas { display: none; }
+
+        .scanner-reticle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 50%;
+            border: 2px solid var(--accent-dim);
+            border-radius: 24px;
+            pointer-events: none;
+        }
+
+        /* Corner accents for the reticle */
+        .scanner-reticle::before, .scanner-reticle::after {
+            content: ''; position: absolute; width: 30px; height: 30px; border-color: var(--accent); border-style: solid;
+        }
+        .scanner-reticle::before { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-top-left-radius: 12px; }
+        .scanner-reticle::after { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-bottom-right-radius: 12px; }
+
+        .response-container {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        #scanning-state-indicator {
+            display: none;
+            color: var(--accent);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            animation: pulseFade 1s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseFade {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        #analytics-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            display: none;
+        }
+
+        .result-meta-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .grid-matrix-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .matrix-cell {
+            background: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            padding: 16px;
+            border-radius: 16px;
+        }
+
+        .cell-tag {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .cell-data {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HOME DASHBOARD -->
+    <div id="dashboard-page" class="page active">
+        <div class="header-section">
+            <h2>MacroSnap</h2>
+            <p id="current-date-string">DATE</p>
+        </div>
+
+        <div class="summary-card">
+            <div>
+                <div class="metric-title">Energy</div>
+                <div class="metric-value-large" id="total-kcal-display">0 <span>/ 2400 KCAL</span></div>
+            </div>
+
+            <div class="macro-progress-container">
+                <div class="macro-progress-row">
+                    <div class="macro-info-label">PRO</div>
+                    <div class="progress-track"><div id="bar-protein" class="progress-bar"></div></div>
+                    <div class="macro-data-numbers" id="val-protein">0g</div>
+                </div>
+                <div class="macro-progress-row">
+                    <div class="macro-info-label">CRB</div>
+                    <div class="progress-track"><div id="bar-carbs" class="progress-bar"></div></div>
+                    <div class="macro-data-numbers" id="val-carbs">0g</div>
+                </div>
+                <div class="macro-progress-row">
+                    <div class="macro-info-label">FAT</div>
+                    <div class="progress-track"><div id="bar-fats" class="progress-bar"></div></div>
+                    <div class="macro-data-numbers" id="val-fats">0g</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Feed</div>
+        <div class="history-feed" id="history-feed-target">
+            <!-- Items inject here -->
+        </div>
+
+        <button class="primary-btn" onclick="navigateToScanner()">Launch Scanner</button>
+    </div>
+
+    <!-- SCANNER SCREEN -->
+    <div id="scanner-page" class="page">
+        <div class="navigation-top">
+            <div class="back-nav-trigger" onclick="navigateToDashboard()">Back</div>
+            <div style="font-weight: 700; text-transform: uppercase; font-size: 1rem; color: var(--accent);">Vision OS</div>
+            <div style="width: 45px;"></div> 
+        </div>
+
+        <div class="camera-module-wrapper">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            <div class="scanner-reticle"></div>
+        </div>
+
+        <div class="response-container">
+            <div id="scanning-state-indicator">Processing...</div>
+
+            <div id="analytics-card">
+                <div id="food-title-output" class="result-meta-title">Item</div>
+                <div class="grid-matrix-metrics">
+                    <div class="matrix-cell"><div class="cell-tag">Calories</div><div class="cell-data" id="out-kcal">0</div></div>
+                    <div class="matrix-cell"><div class="cell-tag">Protein</div><div class="cell-data" id="out-protein">0g</div></div>
+                    <div class="matrix-cell"><div class="cell-tag">Carbs</div><div class="cell-data" id="out-carbs">0g</div></div>
+                    <div class="matrix-cell"><div class="cell-tag">Fats</div><div class="cell-data" id="out-fats">0g</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="scanner-controls-cluster">
+            <button id="capture-execution-trigger" class="primary-btn" onclick="executeImageAnalysis()">Scan Item</button>
+            <button id="commit-data-trigger" class="primary-btn" style="display: none;" onclick="commitAnalysisToMemory()">Save Log</button>
+            <button id="re-verify-trigger" class="outline-btn" style="display: none; margin-top: 16px;" onclick="resetScannerInterface()">Discard</button>
+        </div>
+    </div>
+
+    <script>
+        // --- ⚠️ PUT YOUR GROQ API KEY HERE ⚠️ ---
+        const ORCHESTRATION_KEY = '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';
+        
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const scanningIndicator = document.getElementById('scanning-state-indicator');
+        const analyticsCard = document.getElementById('analytics-card');
+        const captureBtn = document.getElementById('capture-execution-trigger');
+        const commitBtn = document.getElementById('commit-data-trigger');
+        const reverifyBtn = document.getElementById('re-verify-trigger');
+
+        let activeMacroSessionLog = null;
+        const memoryRepository = [];
+        const nutritionalTargets = { kcal: 2400, protein: 160, carbs: 280, fat: 70 };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const dateOptions = { weekday: 'long', month: 'short', day: 'numeric' };
+            document.getElementById('current-date-string').innerText = new Date().toLocaleDateString('en-US', dateOptions);
+            updateDashboardMetricsView();
+        });
+
+        // Bug fix: UI will swap immediately before attempting camera access
+        function navigateToScanner() {
+            document.getElementById('dashboard-page').classList.remove('active');
+            document.getElementById('scanner-page').classList.add('active');
+            initializeCameraPeripheral();
+        }
+
+        function navigateToDashboard() {
+            stopCameraHardwarePeripheral();
+            document.getElementById('scanner-page').classList.remove('active');
+            document.getElementById('dashboard-page').classList.add('active');
+            resetScannerInterface();
+        }
+
+        // Bug fix: Added better error handling for desktop browsers missing cameras
+        async function initializeCameraPeripheral() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                console.warn("Camera failed to load (normal on some desktops):", err);
+                // We do not block the UI. The user will just see a black box on desktop, but the app works.
+            }
+        }
+
+        function stopCameraHardwarePeripheral() {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        async function executeImageAnalysis() {
+            // Failsafe for testing on desktop without a camera
+            if (!video.videoWidth) {
+                alert("No camera feed detected. Ensure you are on a mobile device and granted camera permissions.");
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const base64PayloadPayloadData = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+            captureBtn.style.display = 'none';
+            scanningIndicator.style.display = 'block';
+            analyticsCard.style.display = 'none';
+
+            try {
+                const structuralAPIResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${ORCHESTRATION_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.2-11b-vision-preview",
+                        messages: [{
+                            role: "user",
+                            content: [
+                                { type: "text", text: "Identify the object. If it is edible, evaluate the exact nutritional macro properties for an average serving. Return strictly a single raw formatted JSON object array with no markdown. Schema: {\"food\": \"string_name\", \"calories\": number, \"protein\": number, \"carbs\": number, \"fat\": number}" },
+                                { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64PayloadPayloadData}` } }
+                            ]
+                        }],
+                        temperature: 0.1
+                    })
+                });
+
+                const structuralPayloadJSON = await structuralAPIResponse.json();
+                let sanitationString = structuralPayloadJSON.choices[0].message.content.trim();
+                sanitationString = sanitationString.replace(/```json/g, '').replace(/
+```/g, '').trim();
+                
+                activeMacroSessionLog = JSON.parse(sanitationString);
+                renderExtractedMetrics(activeMacroSessionLog);
+
+            } catch (runtimeException) {
+                console.error("AI Model Error:", runtimeException);
+                alert("Failed to analyze image. Check console for API errors.");
+                resetScannerInterface();
+            }
+        }
+
+        function renderExtractedMetrics(parsedData) {
+            scanningIndicator.style.display = 'none';
+            
+            document.getElementById('food-title-output').innerText = parsedData.food || "Unknown";
+            document.getElementById('out-kcal').innerText = `${parsedData.calories || 0}`;
+            document.getElementById('out-protein').innerText = `${parsedData.protein || 0}g`;
+            document.getElementById('out-carbs').innerText = `${parsedData.carbs || 0}g`;
+            document.getElementById('out-fats').innerText = `${parsedData.fat || 0}g`;
+
+            analyticsCard.style.display = 'block';
+            commitBtn.style.display = 'block';
+            reverifyBtn.style.display = 'block';
+        }
+
+        function resetScannerInterface() {
+            activeMacroSessionLog = null;
+            analyticsCard.style.display = 'none';
+            commitBtn.style.display = 'none';
+            reverifyBtn.style.display = 'none';
+            scanningIndicator.style.display = 'none';
+            captureBtn.style.display = 'block';
+        }
+
+        function commitAnalysisToMemory() {
+            if (!activeMacroSessionLog) return;
+            
+            memoryRepository.unshift({
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                ...activeMacroSessionLog
+            });
+
+            updateDashboardMetricsView();
+            navigateToDashboard();
+        }
+
+        function updateDashboardMetricsView() {
+            let runningKcal = 0, runningProtein = 0, runningCarbs = 0, runningFat = 0;
+
+            const feedContainer = document.getElementById('history-feed-target');
+            feedContainer.innerHTML = '';
+
+            if (memoryRepository.length === 0) {
+                feedContainer.innerHTML = `<div style="text-align: center; color: var(--border-subtle); padding: 32px 16px; font-weight: 700; text-transform: uppercase; font-size: 0.9rem;">No Logs Today</div>`;
+            } else {
+                memoryRepository.forEach(record => {
+                    runningKcal += (record.calories || 0);
+                    runningProtein += (record.protein || 0);
+                    runningCarbs += (record.carbs || 0);
+                    runningFat += (record.fat || 0);
+
+                    const historyCardRowNode = document.createElement('div');
+                    historyCardRowNode.className = 'history-item';
+                    historyCardRowNode.innerHTML = `
+                        <div class="item-details">
+                            <h4>${record.food}</h4>
+                            <p>${record.timestamp} // P:${record.protein}g C:${record.carbs}g F:${record.fat}g</p>
+                        </div>
+                        <div class="item-calories">${record.calories}</div>
+                    `;
+                    feedContainer.appendChild(historyCardRowNode);
+                });
+            }
+
+            document.getElementById('total-kcal-display').innerHTML = `${runningKcal} <span>/ ${nutritionalTargets.kcal}</span>`;
+            document.getElementById('val-protein').innerText = `${runningProtein}g`;
+            document.getElementById('val-carbs').innerText = `${runningCarbs}g`;
+            document.getElementById('val-fats').innerText = `${runningFat}g`;
+
+            document.getElementById('bar-protein').style.width = `${Math.min((runningProtein / nutritionalTargets.protein) * 100, 100)}%`;
+            document.getElementById('bar-carbs').style.width = `${Math.min((runningCarbs / nutritionalTargets.carbs) * 100, 100)}%`;
+            document.getElementById('bar-fats').style.width = `${Math.min((runningFat / nutritionalTargets.fat) * 100, 100)}%`;
+        }
+    </script>
+</body>
+</html>
